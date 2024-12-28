@@ -2,7 +2,7 @@ export const FRAGMENT = 'FRAGMENT' as const;
 
 type Fragment = typeof FRAGMENT;
 type Type = keyof HTMLElementTagNameMap | Component | Fragment;
-type Props = Record<string, any> | null;
+type Props = Record<string, any>;
 type VNode = string | number | null | undefined | VDOM;
 type Component = (props: Props) => VDOM;
 
@@ -18,11 +18,11 @@ export function h(type: Type, props: Props, ...children: VNode[]): VDOM {
 }
 
 export function createElement(node: VNode) {
-  if (node === null || node === undefined) {
+  if (isNullOrUndefined(node)) {
     return document.createDocumentFragment();
   }
 
-  if (typeof node === 'string' || typeof node === 'number') {
+  if (isPrimitive(node)) {
     return document.createTextNode(String(node));
   }
 
@@ -33,14 +33,31 @@ export function createElement(node: VNode) {
       ? document.createDocumentFragment()
       : document.createElement(node.type as keyof HTMLElementTagNameMap);
 
-  Object.entries(node.props)
-    .filter(([_, value]) => value)
-    .forEach(([attr, value]) => {
-      if (element instanceof DocumentFragment) return;
-      element.setAttribute(attr, value);
-    });
+  if (isHTMLElement(element)) {
+    elementSetAttribute(element, node.props);
+  }
 
   node.children.map(createElement).forEach((child) => element.appendChild(child));
 
   return element;
+}
+
+function elementSetAttribute(element: HTMLElement, props: Props = {}) {
+  Object.entries(props)
+    .filter(([_, value]) => value)
+    .forEach(([attr, value]) => {
+      element.setAttribute(attr, value);
+    });
+}
+
+function isHTMLElement(element: DocumentFragment | HTMLElement) {
+  return element instanceof HTMLElement;
+}
+
+function isNullOrUndefined(node: VNode) {
+  return node === null || node === undefined;
+}
+
+function isPrimitive(node: VNode) {
+  return typeof node === 'string' || typeof node === 'number';
 }
