@@ -13,6 +13,7 @@ interface VDOM {
 }
 
 export function h(type: Type, props: Props, ...children: VNode[]): VDOM {
+  props = props ?? {};
   if (typeof type === 'function') return type(props);
   return { type, props, children: children.flat() };
 }
@@ -25,8 +26,6 @@ export function createElement(node: VNode) {
   if (isPrimitive(node)) {
     return document.createTextNode(String(node));
   }
-
-  node.props = node.props || {};
 
   const element =
     node.type === FRAGMENT
