@@ -49,6 +49,9 @@ function elementSetAttribute(element: HTMLElement, props: Props = {}) {
     });
 }
 
+/**
+ * NOTE: createElement Helper Function
+ */
 function isHTMLElement(element: DocumentFragment | HTMLElement) {
   return element instanceof HTMLElement;
 }
