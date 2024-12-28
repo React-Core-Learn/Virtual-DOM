@@ -1,4 +1,7 @@
-type Type = keyof HTMLElementTagNameMap | Component;
+export const FRAGMENT = 'FRAGMENT' as const;
+
+type Fragment = typeof FRAGMENT;
+type Type = keyof HTMLElementTagNameMap | Component | Fragment;
 type Props = Record<string, any> | null;
 type VNode = string | number | null | undefined | VDOM;
 type Component = (props: Props) => VDOM;
@@ -25,11 +28,15 @@ export function createElement(node: VNode) {
 
   node.props = node.props || {};
 
-  const element = document.createElement(node.type as keyof HTMLElementTagNameMap);
+  const element =
+    node.type === FRAGMENT
+      ? document.createDocumentFragment()
+      : document.createElement(node.type as keyof HTMLElementTagNameMap);
 
   Object.entries(node.props)
     .filter(([_, value]) => value)
     .forEach(([attr, value]) => {
+      if (element instanceof DocumentFragment) return;
       element.setAttribute(attr, value);
     });
 

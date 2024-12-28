@@ -8,9 +8,9 @@ export function Custom({ className }: { className: string }) {
 
 export default function App({ count }: { count: number }) {
   return (
-    <div>
+    <>
       <Custom className="active" />
       <span>Hello World {count}</span>
-    </div>
+    </>
   );
 }
