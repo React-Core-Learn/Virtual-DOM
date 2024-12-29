@@ -1,16 +1,6 @@
-export const FRAGMENT = 'FRAGMENT' as const;
-
-type Fragment = typeof FRAGMENT;
-type Type = keyof HTMLElementTagNameMap | Component | Fragment;
-type Props = Record<string, any>;
-type VNode = string | number | null | undefined | VDOM;
-type Component = (props: Props) => VDOM;
-
-interface VDOM {
-  type?: Type;
-  props: Props;
-  children: VNode[];
-}
+import { isHTMLElement, isNullOrUndefined, isPrimitive } from './jsx-runtime.util';
+import { FRAGMENT } from './jsx-runtime.constant';
+import type { Type, Props, VNode, VDOM } from './jsx-runtime.type';
 
 export function h(type: Type, props: Props, ...children: VNode[]): VDOM {
   props = props ?? {};
@@ -47,19 +37,4 @@ function elementSetAttribute(element: HTMLElement, props: Props = {}) {
     .forEach(([attr, value]) => {
       element.setAttribute(attr, value);
     });
-}
-
-/**
- * NOTE: createElement Helper Function
- */
-function isHTMLElement(element: DocumentFragment | HTMLElement) {
-  return element instanceof HTMLElement;
-}
-
-function isNullOrUndefined(node: VNode) {
-  return node === null || node === undefined;
-}
-
-function isPrimitive(node: VNode) {
-  return typeof node === 'string' || typeof node === 'number';
 }
