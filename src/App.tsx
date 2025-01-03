@@ -1,16 +1,15 @@
-export function Custom({ className }: { className: string }) {
-  return (
-    <div className={className}>
-      <b>Custom</b>
-    </div>
-  );
-}
+import { useState } from './lib/render';
 
-export default function App({ count }: { count: number }) {
+export default function App() {
+  const [count, setCount] = useState(1);
+  const handleIncrease = () => {
+    setCount(count + 1);
+  };
+
   return (
-    <>
-      <Custom className="active" />
-      <span>Hello World {count}</span>
-    </>
+    <div>
+      <p>{count}</p>
+      <button onClick={handleIncrease}>+1</button>
+    </div>
   );
 }

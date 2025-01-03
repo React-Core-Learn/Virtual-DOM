@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [tsconfigPaths()],
   esbuild: {
     jsx: 'transform',
-    jsxInject: `import { h, FRAGMENT } from '@/lib/jsx/jsx-runtime'`,
+    jsxInject: `import { h, FRAGMENT } from '@/lib/jsx'`,
     jsxFactory: 'h',
     jsxFragment: 'FRAGMENT',
   },

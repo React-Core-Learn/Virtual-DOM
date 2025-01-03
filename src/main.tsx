@@ -1,7 +1,6 @@
-import { createElement } from '@/lib/jsx/jsx-runtime';
 import App from './App';
+import { render } from './lib/render';
 
 const app = document.getElementById('app')!;
 
-app.appendChild(createElement(<App count={3} />)!);
-console.log(<App count={3} />);
+render(app, App);
