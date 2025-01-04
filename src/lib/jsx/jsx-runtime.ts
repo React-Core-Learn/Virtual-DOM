@@ -61,12 +61,23 @@ export function updateElement(parent: HTMLElement, newNode?: VNode, oldNode?: VN
     return;
   }
 
+  if (!parent.childNodes[index]) return;
+
   if (diffTextVDOM(newNode, oldNode)) {
     parent.replaceChild(createElement(newNode), parent.childNodes[index]);
     return;
   }
 
   if (!isVDOM(oldNode) || !isVDOM(newNode)) return;
+
+  const maxLength = Math.max(newNode!.children.length, oldNode!.children.length);
+
+  if (newNode.type === FRAGMENT || oldNode.type === FRAGMENT) {
+    const fragmentElement = parent.childNodes[index]?.parentNode || parent;
+    Array.from({ length: maxLength }).forEach((_, i) =>
+      updateElement(fragmentElement as HTMLElement, newNode.children[i], oldNode.children[i], i),
+    );
+  }
 
   if (newNode.type !== oldNode.type) {
     parent.replaceChild(createElement(newNode), parent.childNodes[index]);
@@ -77,11 +88,9 @@ export function updateElement(parent: HTMLElement, newNode?: VNode, oldNode?: VN
     updateAttributes(parent.childNodes[index] as HTMLElement, newNode.props, oldNode.props);
   }
 
-  const maxLength = Math.max(newNode!.children.length, oldNode!.children.length);
-
-  for (let i = 0; i < maxLength; i++) {
-    updateElement(parent.childNodes[index] as HTMLElement, newNode.children[i], oldNode.children[i], i);
-  }
+  Array.from({ length: maxLength }).forEach((_, i) =>
+    updateElement(parent.childNodes[index] as HTMLElement, newNode.children[i], oldNode.children[i], i),
+  );
 }
 
 function updateAttributes(target: HTMLElement, newProps: Props = {}, oldProps: Props = {}) {
