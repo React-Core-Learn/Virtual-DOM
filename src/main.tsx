@@ -56,13 +56,9 @@ function createElement(node: VirtualNode | string | number): Node {
   return element;
 }
 
-declare namespace JSX {
-  interface IntrinsicElements {
-    [elemName: string]: any;
-  }
-}
+const state = [{ id: 1, completed: false, content: 'todo list item 1' }];
+const state = [{ id: 2, completed: true, content: 'todo list item 2' }];
 
-// Usage example
 const virtualNode = <div id="app">Hello World</div>;
 const realNode = createElement(virtualNode);
 document.body.appendChild(realNode);
@@ -70,14 +66,13 @@ document.body.appendChild(realNode);
 const app = createElement(
   <div id="app">
     <ul>
-      <li>
-        <input type="checkbox" className="toggle" />
-        todo list item 1<button className="remove">삭제</button>
-      </li>
-      <li className="completed">
-        <input type="checkbox" className="toggle" checked />
-        todo list item 2<button className="remove">삭제</button>
-      </li>
+      {state.map(({ completed, content }) => (
+        <li class={completed ? 'completed' : null}>
+          <input type="checkbox" class="toggle" checked={completed} />
+          {content}
+          <button class="remove">삭제</button>
+        </li>
+      ))}
     </ul>
     <form>
       <input type="text" />
