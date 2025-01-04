@@ -1,9 +1,21 @@
-function h(type, props, ...children) {
+type Props = { [key: string]: any };
+
+interface VirtualNode {
+  type: string;
+  props: Props;
+  children: (VirtualNode | string | number)[];
+}
+
+function h(type: string, props: Props | null, ...children: any[]) {
   if (children.length === 0) {
-    return { type, props, children: [] };
+    return {
+      type,
+      props,
+      children: [],
+    };
   }
 
-  const flatChildren = children.flat().filter((child) => child != null);
+  const flatChildren = children.flat().filter((child): child is VirtualNode | string | number => child != null);
 
   return {
     type,
@@ -12,9 +24,9 @@ function h(type, props, ...children) {
   };
 }
 
-function createElement(node) {
+function createElement(node: VirtualNode | string | number): Node {
   if (typeof node === 'string' || typeof node === 'number') {
-    return document.createTextNode(node);
+    return document.createTextNode(node.toString());
   }
 
   if (!node) {
@@ -28,11 +40,11 @@ function createElement(node) {
       if (name === 'className') {
         element.setAttribute('class', value);
       } else if (name.startsWith('on')) {
-        element.addEventListener(name.toLowerCase().slice(2), value);
+        element.addEventListener(name.toLowerCase().slice(2), value as EventListenerOrEventListenerObject);
       } else if (typeof value === 'boolean' && value) {
         element.setAttribute(name, '');
       } else {
-        element.setAttribute(name, value);
+        element.setAttribute(name, value.toString());
       }
     });
   }
@@ -44,6 +56,13 @@ function createElement(node) {
   return element;
 }
 
+declare namespace JSX {
+  interface IntrinsicElements {
+    [elemName: string]: any;
+  }
+}
+
+// Usage example
 const virtualNode = <div id="app">Hello World</div>;
 const realNode = createElement(virtualNode);
 document.body.appendChild(realNode);
