@@ -55,6 +55,13 @@ const realDom = createElement(
           <button class="remove">삭제</button>
         </li>
       ))}
+      {state.map(({ completed, content }) => (
+        <li class={completed ? 'completed' : null}>
+          <input type="checkbox" class="toggle" checked={completed} />
+          {content}
+          <button class="remove">삭제</button>
+        </li>
+      ))}
     </ul>
     <form>
       <input type="text" />
