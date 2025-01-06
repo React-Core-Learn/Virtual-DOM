@@ -44,11 +44,11 @@ function elementSetAttribute(element: HTMLElement, props: Props = {}) {
     });
 }
 
-const diffTextVDOM = (newVDOM: VNode, currentVDOM: VNode) => {
+function diffTextVDOM(newVDOM: VNode, currentVDOM: VNode) {
   if (JSON.stringify(newVDOM) === JSON.stringify(currentVDOM)) return false;
   if (typeof newVDOM === 'object' || typeof currentVDOM === 'object') return false;
   return true;
-};
+}
 
 export function updateElement(parent: HTMLElement, newNode?: VNode, oldNode?: VNode, index: number = 0) {
   if (!newNode && oldNode) {
