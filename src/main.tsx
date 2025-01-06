@@ -14,85 +14,87 @@ function h(type: string, props: RecordType | null, ...children: any[]): VirtualN
   };
 }
 
-function createElement(node: VirtualNode | string): Node {
-  if (typeof node === 'string') {
-    return document.createTextNode(node);
-  }
-
-  const $element = document.createElement(node.type);
-
-  Object.entries(node.props || {})
-    .filter(([_, value]) => value)
-    .forEach(([attr, value]) => $element.setAttribute(attr, value));
-
-  node.children.map(createElement).forEach((child) => $element.appendChild(child));
-
-  return $element;
-}
-
-function updateElement(parent: Node, oldNode: VirtualNode | string, newNode: VirtualNode | string, index = 0) {
-  const childNode = parent.childNodes[index];
-
-  if (!newNode && oldNode) {
-    if (childNode) parent.removeChild(childNode);
+function updateElement(parent: Node, oldNode: Node | null, newNode: Node | null) {
+  if (!newNode && oldNode && oldNode instanceof HTMLElement) {
+    oldNode.remove();
     return;
   }
 
   if (newNode && !oldNode) {
-    parent.appendChild(createElement(newNode));
+    parent.appendChild(newNode);
     return;
   }
 
-  if (typeof newNode === 'string' && typeof oldNode === 'string') {
-    if (newNode !== oldNode) {
-      if (childNode) parent.replaceChild(createElement(newNode), childNode);
+  if (!oldNode || !newNode) return;
+
+  if (newNode instanceof Text && oldNode instanceof Text) {
+    if (newNode.nodeValue !== oldNode.nodeValue) {
+      oldNode.nodeValue = newNode.nodeValue;
     }
     return;
   }
 
-  if (typeof newNode !== 'string' && typeof oldNode !== 'string' && newNode.type !== oldNode.type) {
-    if (childNode) parent.replaceChild(createElement(newNode), childNode);
-    return;
-  }
-
-  if (typeof oldNode !== 'string' && typeof newNode !== 'string') {
-    if (childNode instanceof HTMLElement) {
-      updateAttributes(childNode, newNode.props, oldNode.props);
+  if (oldNode instanceof Element && newNode instanceof Element) {
+    if (newNode.nodeName !== oldNode.nodeName) {
+      oldNode.replaceWith(newNode);
+      return;
     }
 
-    const maxLength = Math.max(newNode.children.length, oldNode.children.length);
+    updateAttributes(oldNode, newNode);
+
+    const newChildren = Array.from(newNode.childNodes);
+    const oldChildren = Array.from(oldNode.childNodes);
+    const maxLength = Math.max(newChildren.length, oldChildren.length);
+
     for (let i = 0; i < maxLength; i++) {
-      updateElement(childNode!, oldNode.children[i], newNode.children[i], i);
-    }
-  }
-
-  function updateAttributes(target: HTMLElement, newProps: RecordType, oldProps: RecordType) {
-    for (const [attr, value] of Object.entries(newProps)) {
-      if (oldProps[attr] !== value) target.setAttribute(attr, value);
-    }
-    for (const attr of Object.keys(oldProps)) {
-      if (!(attr in newProps)) target.removeAttribute(attr);
+      updateElement(oldNode, oldChildren[i] || null, newChildren[i] || null);
     }
   }
 }
 
-const render = (state: RecordType[]) => (
-  <div id="app">
-    <ul>
-      {state.map(({ completed, content }) => (
-        <li class={completed ? 'completed' : null}>
-          <input type="checkbox" class="toggle" checked={completed} />
-          {content}
-          <button class="remove">삭제</button>
-        </li>
-      ))}
-    </ul>
-    <form>
-      <input type="text" />
-      <button type="submit">추가</button>
-    </form>
-  </div>
-);
+function updateAttributes(oldNode: Element, newNode: Element) {
+  const oldProps = Array.from(oldNode.attributes);
+  const newProps = Array.from(newNode.attributes);
+
+  for (const { name, value } of newProps) {
+    if (oldNode.getAttribute(name) !== value) {
+      oldNode.setAttribute(name, value);
+    }
+  }
+
+  for (const { name } of oldProps) {
+    if (!newNode.hasAttribute(name)) {
+      oldNode.removeAttribute(name);
+    }
+  }
+}
+
+const render = (state: RecordType[]) => {
+  const element = document.createElement('div');
+  element.innerHTML = `
+    <div id="app">
+      <ul>
+        ${state
+          .map(
+            ({ completed, content }) => `
+              <li class="${completed ? 'completed' : ''}">
+                <input type="checkbox" class="toggle" ${completed ? 'checked' : ''} />
+                ${content}
+                <button class="remove">삭제</button>
+              </li>
+            `,
+          )
+          .join('')}
+      </ul>
+      <form>
+        <input type="text" />
+        <button type="submit">추가</button>
+      </form>
+    </div>
+  `.trim();
+
+  return element.firstElementChild;
+};
 
 const oldState = [
   { id: 1, completed: false, content: 'todo list item 1' },
@@ -105,12 +107,17 @@ const newState = [
   { id: 3, completed: false, content: 'todo list item 3' },
 ];
 
-const oldNode = render(oldState);
-const newNode = render(newState);
-
 const $root = document.createElement('div');
 document.body.appendChild($root);
 
-$root.appendChild(createElement(oldNode));
+const oldNode = render(oldState);
+if (oldNode) {
+  $root.appendChild(oldNode);
+}
 
-setTimeout(() => updateElement($root, oldNode, newNode), 1000);
+setTimeout(() => {
+  const newNode = render(newState);
+  if (oldNode && newNode) {
+    updateElement($root, oldNode, newNode);
+  }
+}, 1000);
