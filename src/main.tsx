@@ -1,5 +1,5 @@
 import App from './App';
-import { render } from './lib/render';
+import { render } from './lib/core';
 
 const app = document.getElementById('app')!;
 

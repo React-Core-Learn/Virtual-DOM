@@ -1,4 +1,4 @@
-import { useState } from './lib/render';
+import { useState } from './lib/core';
 
 function Wrapper() {
   return (
