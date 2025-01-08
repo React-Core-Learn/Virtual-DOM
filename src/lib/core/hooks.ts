@@ -1,13 +1,6 @@
 import { updateElement } from '@/lib/jsx/jsx-runtime';
-import { VDOM, Component } from '../jsx/jsx-runtime.type';
-
-interface Internals {
-  rootElement: HTMLElement | null;
-  rootComponent: Component | null;
-  currentVDOM: null | VDOM;
-  states: any[];
-  hookIndex: number;
-}
+import { Component } from '../jsx/jsx-runtime.type';
+import { Internals } from './hooks.type';
 
 export const { useState, render } = (function () {
   const INTERNALS: Internals = {

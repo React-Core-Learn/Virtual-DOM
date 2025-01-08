@@ -1,4 +1,4 @@
-import { useState } from './lib/core';
+import { useState } from './lib/core/hooks';
 
 function Wrapper() {
   return (
